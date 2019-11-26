@@ -148,7 +148,8 @@ const store = new Vuex.Store({
 			return highlightCount;
 		},
 		title(state, getters) {
-			const alertEventCount = getters.highlightCount ? `(${getters.highlightCount}) ` : "";
+			const highlightCount = getters.highlightCount;
+			const alertEventCount = highlightCount ? `(${highlightCount}) ` : "";
 
 			const channelname = state.activeChannel ? `${state.activeChannel.channel.name} — ` : "";
 
