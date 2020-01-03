@@ -89,6 +89,9 @@ export const config = normalizeConfig({
 	media: {
 		default: true,
 	},
+	uploadCanvas: {
+		default: true,
+	},
 	userStyles: {
 		default: "",
 		apply(store, value) {
