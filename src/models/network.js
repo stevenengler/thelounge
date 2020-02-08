@@ -6,6 +6,7 @@ const IrcFramework = require("irc-framework");
 const Chan = require("./chan");
 const Msg = require("./msg");
 const Helper = require("../helper");
+const ClientCertificate = require("../plugins/clientCertificate");
 
 module.exports = Network;
 
@@ -85,6 +86,10 @@ Network.prototype.validate = function(client) {
 		this.port = this.tls ? 6697 : 6667;
 	}
 
+	if (!this.tls) {
+		ClientCertificate.remove(this.uuid);
+	}
+
 	if (Helper.config.lockNetwork) {
 		// This check is needed to prevent invalid user configurations
 		if (
@@ -145,6 +150,7 @@ Network.prototype.createIrcFramework = function(client) {
 		auto_reconnect_wait: 10000 + Math.floor(Math.random() * 1000), // If multiple users are connected to the same network, randomize their reconnections a little
 		auto_reconnect_max_retries: 360, // At least one hour (plus timeouts) worth of reconnections
 		webirc: this.createWebIrc(client),
+		clientCertificate: this.tls ? ClientCertificate.get(this.uuid) : null,
 	});
 
 	this.irc.requestCap([
@@ -242,6 +248,7 @@ Network.prototype.edit = function(client, args) {
 		this.irc.options.gecos = this.irc.user.gecos = this.realname;
 		this.irc.options.tls = this.tls;
 		this.irc.options.rejectUnauthorized = this.rejectUnauthorized;
+		this.irc.options.clientCertificate = this.tls ? ClientCertificate.get(this.uuid) : null;
 
 		if (!Helper.config.useHexIp) {
 			this.irc.options.username = this.irc.user.username = this.username;
