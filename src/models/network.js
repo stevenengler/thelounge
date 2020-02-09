@@ -168,8 +168,15 @@ Network.prototype.setIrcFrameworkOptions = function(client) {
 	this.irc.options.gecos = this.realname;
 	this.irc.options.tls = this.tls;
 	this.irc.options.rejectUnauthorized = this.rejectUnauthorized;
-	this.irc.options.clientCertificate = this.tls ? ClientCertificate.get(this.uuid) : null;
 	this.irc.options.webirc = this.createWebIrc(client);
+
+	this.irc.options.clientCertificate = this.tls ? ClientCertificate.get(this.uuid) : null;
+
+	if (this.irc.options.clientCertificate && !this.irc.options.password) {
+		this.irc.options.sasl_mechanism = "EXTERNAL";
+	} else {
+		delete this.irc.options.sasl_mechanism;
+	}
 };
 
 Network.prototype.createWebIrc = function(client) {
