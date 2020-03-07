@@ -194,8 +194,20 @@ class MessageStorage {
 		}
 
 		let select =
-			'SELECT msg, type, time, channel FROM messages WHERE type = "message" AND network = ? AND json_extract(msg, "$.text") LIKE ?';
-		const params = [query.networkUuid, `%${query.searchTerm}%`];
+			'SELECT msg, type, time, channel FROM messages WHERE type = "message" AND (json_extract(msg, "$.text") LIKE ?';
+		const params = [`%${query.searchTerm}%`];
+
+		if (query.searchNicks) {
+			select += ' OR json_extract(msg, "$.from.nick") LIKE ?)';
+			params.push(query.searchTerm);
+		} else {
+			select += ")";
+		}
+
+		if (query.networkUuid) {
+			select += " AND network = ? ";
+			params.push(query.networkUuid);
+		}
 
 		if (query.channelName) {
 			select += " AND channel = ? ";
@@ -203,7 +215,8 @@ class MessageStorage {
 		}
 
 		select += " ORDER BY time DESC LIMIT 100 OFFSET ? ";
-		params.push(query.offset || 0);
+		query.offset = parseInt(query.offset, 10) || 0;
+		params.push(query.offset);
 
 		return new Promise((resolve, reject) => {
 			this.database.all(select, params, (err, rows) => {

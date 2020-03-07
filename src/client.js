@@ -502,13 +502,8 @@ Client.prototype.more = function(data) {
 };
 
 Client.prototype.search = function(query) {
-	if (this.messageStorage) {
-		for (const storage of this.messageStorage) {
-			if (storage.database) {
-				return storage.search(query);
-			}
-		}
-	}
+	const messageStorage = this.messageStorage.find((s) => s.canProvideMessages());
+	return messageStorage.search(query);
 };
 
 Client.prototype.open = function(socketId, target) {
